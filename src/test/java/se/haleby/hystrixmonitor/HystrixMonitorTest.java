@@ -22,7 +22,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class HystrixMonitorTest {
 
     @Autowired
-    private AlertSystem alertSystem;
+    private MonitoringSystem monitoringSystem;
 
     static MockWebServer mockWebServer;
 
@@ -43,7 +43,7 @@ public class HystrixMonitorTest {
 
     @Test public void
     alarm_is_triggered_when_circuit_breaker_switches_from_closed_to_opened()  {
-        await().until(alertSystem::isCircuitBreakerOpened);
+        await().until(monitoringSystem::isCircuitBreakerOpened);
     }
 }
 

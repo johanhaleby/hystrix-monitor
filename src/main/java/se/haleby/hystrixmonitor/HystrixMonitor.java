@@ -17,12 +17,12 @@ public class HystrixMonitor {
     private static final Logger log = LoggerFactory.getLogger(HystrixMonitor.class);
 
     private final HttpAsyncClient httpAsyncClient;
-    private final AlertSystem alertSystem;
+    private final MonitoringSystem monitoringSystem;
 
     @Autowired
-    public HystrixMonitor(HttpAsyncClient httpAsyncClient, AlertSystem alertSystem) {
+    public HystrixMonitor(HttpAsyncClient httpAsyncClient, MonitoringSystem monitoringSystem) {
         this.httpAsyncClient = httpAsyncClient;
-        this.alertSystem = alertSystem;
+        this.monitoringSystem = monitoringSystem;
     }
 
     @PostConstruct
@@ -33,14 +33,14 @@ public class HystrixMonitor {
                 filter(data -> data.contains("isCircuitBreakerOpen")).
                 map(data -> data.substring("data:".length())).
                 map(data -> JsonPath.from(data).getBoolean("isCircuitBreakerOpen")).
-                map(isCircuitBreakerCurrentlyOpened -> Pair.of(isCircuitBreakerCurrentlyOpened, alertSystem.isCircuitBreakerOpened())).
+                map(isCircuitBreakerCurrentlyOpened -> Pair.of(isCircuitBreakerCurrentlyOpened, monitoringSystem.isCircuitBreakerOpened())).
                 filter(pair -> pair.getLeft() != pair.getRight()).
                 map(Pair::getLeft).
                 doOnNext(isCircuitBreakerOpened -> {
                     if (isCircuitBreakerOpened) {
-                        alertSystem.reportCircuitBreakerOpened();
+                        monitoringSystem.reportCircuitBreakerOpened();
                     } else {
-                        alertSystem.reportCircuitBreakerClosed();
+                        monitoringSystem.reportCircuitBreakerClosed();
                     }
                 }).
                 doOnError(throwable -> log.error("Error", throwable)).
