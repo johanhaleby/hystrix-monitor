@@ -17,30 +17,30 @@ public class HystrixMonitor {
     private static final Logger log = LoggerFactory.getLogger(HystrixMonitor.class);
 
     private final HttpAsyncClient httpAsyncClient;
-    private final AlarmSystem alarmSystem;
+    private final ReportingSystem reportingSystem;
 
     @Autowired
-    public HystrixMonitor(HttpAsyncClient httpAsyncClient, AlarmSystem alarmSystem) {
+    public HystrixMonitor(HttpAsyncClient httpAsyncClient, ReportingSystem reportingSystem) {
         this.httpAsyncClient = httpAsyncClient;
-        this.alarmSystem = alarmSystem;
+        this.reportingSystem = reportingSystem;
     }
 
     @PostConstruct
     public void subscribeToHystrixStream() {
         ObservableHttp.createGet("http://localhost:6543/hystrix.stream", httpAsyncClient).toObservable().
                 flatMap(response -> response.getContent().map(String::new)).
-                filter(hystrixPackage -> hystrixPackage.startsWith("data:")).
+                filter(hystrixEvent -> hystrixEvent.startsWith("data:")).
                 filter(data -> data.contains("isCircuitBreakerOpen")).
                 map(data -> data.substring("data:".length())).
                 map(data -> JsonPath.from(data).getBoolean("isCircuitBreakerOpen")).
-                map(isCircuitBreakerCurrentlyOpened -> Pair.of(isCircuitBreakerCurrentlyOpened, alarmSystem.isCircuitBreakerOpened())).
+                map(isCircuitBreakerCurrentlyOpened -> Pair.of(isCircuitBreakerCurrentlyOpened, reportingSystem.isCircuitBreakerOpened())).
                 filter(pair -> pair.getLeft() != pair.getRight()).
                 map(Pair::getLeft).
                 doOnNext(isCircuitBreakerOpened -> {
                     if (isCircuitBreakerOpened) {
-                        alarmSystem.reportCircuitBreakerOpened();
+                        reportingSystem.reportCircuitBreakerOpened();
                     } else {
-                        alarmSystem.reportCircuitBreakerClosed();
+                        reportingSystem.reportCircuitBreakerClosed();
                     }
                 }).
                 doOnError(throwable -> log.error("Error", throwable)).

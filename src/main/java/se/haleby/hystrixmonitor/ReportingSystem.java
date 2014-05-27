@@ -3,11 +3,11 @@ package se.haleby.hystrixmonitor;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AlarmSystem {
+public class ReportingSystem {
 
     private boolean isCircuitBreakerClosed;
 
-    public AlarmSystem() {
+    public ReportingSystem() {
         this.isCircuitBreakerClosed = true;
     }
 
