@@ -42,8 +42,8 @@ public class HystrixMonitorTest {
 
 
     @Test public void
-    alarm_is_triggered_when_circuit_breaker_switches_from_closed_to_opened()  {
-        await().until(monitoringSystem::isCircuitBreakerOpened);
+    alarm_is_triggered_when_circuit_breaker_switches_from_opened_to_closed()  {
+        await().until(monitoringSystem::isCircuitBreakerClosed);
     }
 }
 
