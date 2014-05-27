@@ -29,7 +29,6 @@ public class HystrixMonitor {
     public void subscribeToHystrixStream() {
         ObservableHttp.createGet("http://localhost:6543/hystrix.stream", httpAsyncClient).toObservable().
                 flatMap(response -> response.getContent().map(String::new)).
-                doOnNext(System.out::println).
                 filter(hystrixPackage -> hystrixPackage.startsWith("data:")).
                 filter(data -> data.contains("isCircuitBreakerOpen")).
                 map(data -> data.substring("data:".length())).
